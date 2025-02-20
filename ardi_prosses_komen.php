@@ -9,6 +9,21 @@ if (!isset($_POST['fotoid']) || !isset($_POST['isikomen'])) {
 $ardi_fotoid = trim($_POST['fotoid']);
 $ardi_isikomen = trim($_POST['isikomen']);
 
+if (mysqli_query($koneksi, $query)) {
+    $result = mysqli_query($koneksi, "SELECT userid FROM foto WHERE fotoid='$fotoid'");
+    $row = mysqli_fetch_assoc($result);
+    $fotoOwnerId = $row['userid'];
+
+    if ($fotoOwnerId != $userid) {
+        $content = "mengomentari foto Anda : $isikomentar";
+        mysqli_query($koneksi, "INSERT INTO notifications (userid, action_userid, content, created_at, fotoid) 
+                                 VALUES ('$fotoOwnerId', '$userid', '$content', NOW(), '$fotoid')");
+    }
+
+    header("Location: home.php?fotoid=$fotoid");
+} else {
+    echo "Error: " . mysqli_error($koneksi);
+}
 if (!isset($_SESSION['userid']) || empty($_SESSION['userid'])) {
     die("Error: User belum login!");
 }
@@ -34,4 +49,6 @@ if ($query) {
 } else {
     die("Error: " . mysqli_error($ardi_conn));
 }
+
+
 ?>

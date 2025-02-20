@@ -2,28 +2,33 @@
 session_start();
 include 'ardi_koneksi.php';
 
-if (!isset($_SESSION['userid'])) {
-    header("Location: login.php");
-    exit();
-}
+$fotoid = $_GET['fotoid'];
+$userid = $_SESSION['userid'];
 
-$ardi_userid = $_SESSION['userid'];
+$ceksuka = mysqli_query($ardi_conn, "SELECT * FROM likefoto WHERE fotoid='$fotoid' AND userid='$userid'");
 
-if (!isset($_GET['fotoid'])) {
-    header("Location: ardi_home.php");
-    exit();
-}
-
-$fotoid = mysqli_real_escape_string($ardi_conn, $_GET['fotoid']);
-
-$ardi_ceksuka = mysqli_query($ardi_conn, "SELECT * FROM likefoto WHERE fotoid='$fotoid' AND userid='$ardi_userid'");
-if (mysqli_num_rows($ardi_ceksuka) > 0) {
-    mysqli_query($ardi_conn, "DELETE FROM likefoto WHERE fotoid='$fotoid' AND userid='$ardi_userid'");
+if (mysqli_num_rows($ceksuka) == 1) {
+    while ($row = mysqli_fetch_array($ceksuka)) {
+        $likeid = $row['likeid'];
+        $query = mysqli_query($ardi_conn, "DELETE FROM likefoto WHERE likeid='$likeid'");
+    }
 } else {
-    $query = "INSERT INTO likefoto (fotoid, userid, tanggallike) VALUES ('$fotoid', '$ardi_userid', NOW())";
-    mysqli_query($ardi_conn, $query);
+    $tanggallike = date('Y-m-d');
+    $query = mysqli_query($ardi_conn, "INSERT INTO likefoto (likeid, fotoid, userid, tanggallike) 
+                                      VALUES('', '$fotoid', '$userid', '$tanggallike')");
+
+    if ($query) {
+        $result = mysqli_query($ardi_conn, "SELECT userid FROM foto WHERE fotoid='$fotoid'");
+        $row = mysqli_fetch_assoc($result);
+        $fotoOwnerId = $row['userid'];
+
+        if ($fotoOwnerId != $userid) {
+            $content = "menyukai foto Anda.";
+            mysqli_query($ardi_conn, "INSERT INTO notifications (userid, action_userid, content, created_at, fotoid) 
+                                     VALUES ('$fotoOwnerId', '$userid', '$content', NOW(), '$fotoid')");
+        }
+    }
 }
 
-header("Location: ardi_home.php");
-exit();
+echo "<script>location.href='home.php';</script>";
 ?>

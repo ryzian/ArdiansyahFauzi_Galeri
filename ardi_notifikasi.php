@@ -54,16 +54,7 @@ $hasil = mysqli_query($ardi_conn, $hitung_notif);
 $belum_dibaca = mysqli_fetch_assoc($hasil)['belum_dibaca'];
 
 $no = $start_from + 1;
-require 'ardi_koneksi.php'; // Pastikan koneksi benar
 
-// Ambil notifikasi dari database
-$query = "SELECT * FROM notifications ORDER BY created_at DESC";
-$result = mysqli_query($ardi_conn, $query);
-
-// Cek jika query error
-if (!$result) {
-    die("Query Error: " . mysqli_error($ardi_conn));
-}
 ?>
 <html>
 
@@ -121,22 +112,19 @@ if (!$result) {
         <div class="header-container">
             <h2 class="text-secondary" style="margin-bottom: 20px;">Notifikasi</h2>
 
-            <div class="container mt-3" style="margin-bottom:20px;">
-        <div class="header-container">
-            <h2 class="text-secondary" style="margin-bottom: 20px;">Notifikasi</h2>
-
-            <!-- Tombol Aksi (Jika Ada Notifikasi) -->
             <?php if (mysqli_num_rows($result) > 0) : ?>
                 <div class="action-buttons">
                     <form action="proses_tandai_baca.php" method="POST" class="action-form">
                         <button type="submit" class="btn btn-warning btn-sm">
-                            <i class="fa fa-check-circle-o"></i> Tandai Semua Dibaca
+                            <i class="fa fa-check-circle-o"></i>
+                            <span class="tooltip-text">Tandai Semua Dibaca</span>
                         </button>
                     </form>
 
                     <form action="proses_clear_notifikasi.php" method="POST" class="action-form">
                         <button type="submit" class="btn btn-danger btn-sm">
-                            <i class="fa fa-trash-o"></i> Hapus Semua Notifikasi
+                            <i class="fa fa-trash-o"></i>
+                            <span class="tooltip-text">Hapus Semua Notifikasi</span>
                         </button>
                     </form>
                 </div>
@@ -153,7 +141,7 @@ if (!$result) {
                 'gagal_tandai' => 'Terjadi kesalahan saat menandai sebagai dibaca.'
             ];
             if (isset($statusMessages[$_GET['status']])) : ?>
-                <div class="alert alert-<?php echo in_array($_GET['status'], ['success', 'berhasil_tandai']) ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
+                <div class="alert alert-<?php echo ($_GET['status'] == 'success' || $_GET['status'] == 'berhasil_tandai') ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
                     <?php echo $statusMessages[$_GET['status']]; ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -188,9 +176,6 @@ if (!$result) {
             <p class="text-muted text-center">Tidak ada notifikasi untuk Anda.</p>
         <?php endif; ?>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 
     
     <nav>

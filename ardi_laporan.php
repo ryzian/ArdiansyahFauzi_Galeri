@@ -93,7 +93,6 @@ $totalLike = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS tot
     <title>Laporan Galeri Foto</title>
     <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.com/libraries/Chart.js">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
    
     <style>
         body { background-color: #f8f9fa; }
@@ -232,8 +231,9 @@ $totalLike = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS tot
     
     </div>
 </div>
-
+<script src="node_modules/chart.js/dist/chart.umd.js"></script>
 <script>
+    
      const chartLabels = <?php echo json_encode(array_column($reportData, 'namaalbum')); ?>;
         const jumlahFoto = <?php echo json_encode(array_column($reportData, 'jumlahfoto')); ?>;
         const jumlahLike = <?php echo json_encode(array_column($reportData, 'jumlahlike')); ?>;
