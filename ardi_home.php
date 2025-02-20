@@ -72,6 +72,9 @@ if (isset($_GET['delete_comment_id'])) {
       .card:hover {
           transform: scale(1.05);
       }
+      .barakuda {
+        object-fit: cover;
+      }
    
     </style>
 </head>
@@ -137,7 +140,7 @@ if (isset($_GET['delete_comment_id'])) {
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-8">
-                        <img id="printableImage<?php echo $fotoid; ?>" style="width: 100%;" src="assets/img/<?php echo htmlspecialchars($ardi_data['tempatfile']); ?>">
+                        <img class="barakuda" id="printableImage<?php echo $fotoid; ?>" style="width: 100%;" src="assets/img/<?php echo htmlspecialchars($ardi_data['tempatfile']); ?>">
                     </div>
                     <div class="col-md-4">
                         <h5><?php echo htmlspecialchars($ardi_data['judulfoto']); ?></h5>
