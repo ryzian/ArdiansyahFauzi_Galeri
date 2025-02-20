@@ -28,7 +28,41 @@ $queryFoto = mysqli_query($ardi_conn, "SELECT foto.*,
     (SELECT COUNT(*) FROM likefoto WHERE likefoto.fotoid = foto.fotoid) AS jumlah_like
     FROM foto 
     $whereClause");
+function generateReport($koneksi, $userid, $albumid = null, $sort_by = 'album.namaalbum', $sort_order = 'ASC', $start = 0, $limit = 5)
+{
+    $whereClause = "WHERE album.userid = '$userid'";
+    if ($albumid) {
+        $whereClause .= " AND album.albumid = '$albumid'";
+    }
 
+    $orderBy = "ORDER BY $sort_by $sort_order";
+    $limitClause = "LIMIT $start, $limit";
+
+    $query = "SELECT album.albumid, album.namaalbum, 
+                     (SELECT lokasifile FROM foto WHERE albumid = album.albumid ORDER BY tanggalunggah DESC LIMIT 1) as lokasifile,
+                     COUNT(DISTINCT foto.fotoid) as jumlah_foto, 
+                     COUNT(DISTINCT likefoto.likeid) as jumlah_like,    
+                     COUNT(DISTINCT komentarfoto.komentarid) as jumlah_komen
+              FROM album
+              LEFT JOIN foto ON album.albumid = foto.albumid
+              LEFT JOIN likefoto ON foto.fotoid = likefoto.fotoid
+              LEFT JOIN komentarfoto ON foto.fotoid = komentarfoto.fotoid
+              $whereClause
+              GROUP BY album.albumid, album.namaalbum
+              $orderBy
+              $limitClause";
+
+    $result = mysqli_query($koneksi, $query);
+    $data = [];
+
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data[] = $row;
+        }
+    }
+
+    return $data;
+}
 $totalFoto = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS total FROM foto WHERE userid = '$ardi_UserID'"))['total'];
 $totalAlbum = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS total FROM album WHERE userid = '$ardi_UserID'"))['total'];
 $totalLike = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS total FROM likefoto WHERE fotoid IN (SELECT fotoid FROM foto WHERE userid = '$ardi_UserID')"))['total'];
@@ -96,9 +130,7 @@ $totalLike = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS tot
         </div>
     </div>
 </nav>
-<div class="chart-container">
-            <canvas id="laporanChart"></canvas>
-        </div>
+
 <div class="container mt-3">
     <h2 class="text-center fw-bold mb-4">Laporan Galeri Foto</h2>
     <div class="row mb-3">
@@ -178,6 +210,9 @@ $totalLike = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS tot
     
     </div>
 </div>
+<div class="chart-container">
+            <canvas id="laporanChart"></canvas>
+        </div>
 <script>
      const chartLabels = <?php echo json_encode(array_column($reportData, 'namaalbum')); ?>;
         const jumlahFoto = <?php echo json_encode(array_column($reportData, 'jumlahfoto')); ?>;
