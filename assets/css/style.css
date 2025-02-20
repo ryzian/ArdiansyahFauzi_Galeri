@@ -1,0 +1,78 @@
+body {
+    background: #f4f4f9;
+    font-family: 'Poppins', sans-serif;
+    position: relative;
+    min-height: 100vh;
+    padding-bottom: 60px; 
+}
+.navbar {
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        background-color: #343a40 !important;
+    }
+    .navbar-brand, .nav-link, .btn-outline-danger {
+        color: white !important;
+    }
+.card {
+    border-radius: 10px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    overflow: hidden;
+}
+.card img {
+    transition: transform 0.3s ease-in-out;
+    object-fit: cover;
+    height: 200px;
+}
+.card:hover img {
+    transform: scale(1.08);
+}
+.card:hover {
+    transform: scale(1.03);
+    box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.15);
+}
+.card-footer {
+    background: white;
+}
+.icon {
+    font-size: 1.2rem;
+}
+.icon:hover {
+    color: #dc3545;
+}
+.modal-header {
+    background: #007bff;
+    color: white;
+    border-radius: 10px 10px 0 0;
+}
+.modal-content {
+    border-radius: 10px;
+}
+.modal-body {
+    font-size: 1rem;
+}
+.list-group-item {
+    border: none;
+    background: #f8f9fa;
+    border-left: 4px solid #007bff;
+    margin-bottom: 5px;
+    padding: 10px;
+}
+footer {
+    background: #343a40;
+    color: white;
+    padding: 15px 0;
+    text-align: center;
+    font-size: 0.9rem;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+.navbar-brand {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #007bff !important;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+    .navbar-brand:hover {
+        color: #0056b3 !important;
+    }
