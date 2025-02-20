@@ -8,12 +8,19 @@ if ($_SESSION['status'] != 'login') {
     location.href='ardi_dasboard_public.php';
     </script>";
 }
+$koneksi = mysqli_connect("localhost", "root", "", "ardidb_galeri");
+if (!$koneksi) {
+    die("Koneksi gagal: " . mysqli_connect_error());
+}
 
-$ardi_UserID = $_SESSION['userid'];
+$ardi_userid = $_SESSION['userid'];
+$start = isset($_GET['start']) ? $_GET['start'] : 0;
+$limit = isset($_GET['limit']) ? $_GET['limit'] : 5;
+$userid = $_SESSION['userid'];
 
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 'all';
 
-$whereClause = "WHERE foto.userid = '$ardi_UserID'";
+$whereClause = "WHERE foto.userid = '$ardi_userid'";
 
 if ($filter == 'week') {
     $whereClause .= " AND YEARWEEK(tanggalupload, 1) = YEARWEEK(CURDATE(), 1)";
@@ -28,6 +35,9 @@ $queryFoto = mysqli_query($ardi_conn, "SELECT foto.*,
     (SELECT COUNT(*) FROM likefoto WHERE likefoto.fotoid = foto.fotoid) AS jumlah_like
     FROM foto 
     $whereClause");
+$albumid = isset($_GET['albumid']) ? $_GET['albumid'] : null;
+$sort_by = isset($_GET['sort_by']) ? $_GET['sort_by'] : 'album.namaalbum';
+$sort_order = isset($_GET['sort_order']) ? $_GET['sort_order'] : 'ASC';
 function generateReport($koneksi, $userid, $albumid = null, $sort_by = 'album.namaalbum', $sort_order = 'ASC', $start = 0, $limit = 5)
 {
     $whereClause = "WHERE album.userid = '$userid'";
@@ -39,14 +49,14 @@ function generateReport($koneksi, $userid, $albumid = null, $sort_by = 'album.na
     $limitClause = "LIMIT $start, $limit";
 
     $query = "SELECT album.albumid, album.namaalbum, 
-                     (SELECT lokasifile FROM foto WHERE albumid = album.albumid ORDER BY tanggalunggah DESC LIMIT 1) as lokasifile,
-                     COUNT(DISTINCT foto.fotoid) as jumlah_foto, 
-                     COUNT(DISTINCT likefoto.likeid) as jumlah_like,    
-                     COUNT(DISTINCT komentarfoto.komentarid) as jumlah_komen
+                     (SELECT tempatfile FROM foto WHERE albumid = album.albumid ORDER BY tanggalupload DESC LIMIT 1) as tempatfile,
+                     COUNT(DISTINCT foto.fotoid) as jumlahfoto, 
+                     COUNT(DISTINCT likefoto.likeid) as jumlahlike,    
+                     COUNT(DISTINCT komenfoto.komenid) as jumlahkomen
               FROM album
               LEFT JOIN foto ON album.albumid = foto.albumid
               LEFT JOIN likefoto ON foto.fotoid = likefoto.fotoid
-              LEFT JOIN komentarfoto ON foto.fotoid = komentarfoto.fotoid
+              LEFT JOIN komenfoto ON foto.fotoid = komenfoto.fotoid
               $whereClause
               GROUP BY album.albumid, album.namaalbum
               $orderBy
@@ -63,9 +73,16 @@ function generateReport($koneksi, $userid, $albumid = null, $sort_by = 'album.na
 
     return $data;
 }
-$totalFoto = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS total FROM foto WHERE userid = '$ardi_UserID'"))['total'];
-$totalAlbum = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS total FROM album WHERE userid = '$ardi_UserID'"))['total'];
-$totalLike = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS total FROM likefoto WHERE fotoid IN (SELECT fotoid FROM foto WHERE userid = '$ardi_UserID')"))['total'];
+
+$reportData = generateReport($ardi_conn, $ardi_userid, $albumid, $sort_by, $sort_order, $start, $limit);
+
+$totalDataQuery = "SELECT COUNT(*) AS total FROM album WHERE userid = '$userid'";
+$totalDataResult = mysqli_query($koneksi, $totalDataQuery);
+$totalData = mysqli_fetch_assoc($totalDataResult)['total'];
+$totalPages = ceil($totalData / $limit);
+$totalFoto = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS total FROM foto WHERE userid = '$ardi_userid'"))['total'];
+$totalAlbum = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS total FROM album WHERE userid = '$ardi_userid'"))['total'];
+$totalLike = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS total FROM likefoto WHERE fotoid IN (SELECT fotoid FROM foto WHERE userid = '$ardi_userid')"))['total'];
 ?>
 
 <!DOCTYPE html>
@@ -75,6 +92,8 @@ $totalLike = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS tot
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Galeri Foto</title>
     <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.com/libraries/Chart.js">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
    
     <style>
         body { background-color: #f8f9fa; }
@@ -132,7 +151,7 @@ $totalLike = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS tot
 </nav>
 
 <div class="container mt-3">
-    <h2 class="text-center fw-bold mb-4">Laporan Galeri Foto</h2>
+    <h2 class="text-center fw-bold mb-4">Laporan Rekap Galeri</h2>
     <div class="row mb-3">
         <div class="col-md-4">
             <div class="stat-card">
@@ -153,7 +172,10 @@ $totalLike = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS tot
             </div>
         </div>
     </div>
-
+    <div class="chart-container">
+            <canvas id="laporanChart"></canvas>
+        </div>
+        <hr>
     <div class="d-flex mb-3">
         <a href="?filter=all" class="btn btn-outline-secondary filter-btn">Semua</a>
         <a href="?filter=day" class="btn btn-outline-primary filter-btn">Hari Ini</a>
@@ -210,9 +232,7 @@ $totalLike = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS tot
     
     </div>
 </div>
-<div class="chart-container">
-            <canvas id="laporanChart"></canvas>
-        </div>
+
 <script>
      const chartLabels = <?php echo json_encode(array_column($reportData, 'namaalbum')); ?>;
         const jumlahFoto = <?php echo json_encode(array_column($reportData, 'jumlahfoto')); ?>;
