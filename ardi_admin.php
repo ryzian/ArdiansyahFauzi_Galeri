@@ -90,6 +90,8 @@ if (isset($_GET['delete_comment_id'])) {
         <a href="ardi_album.php" class="nav-link fw-bold btn btn-success">Data Album</a>
         <a href="ardi_foto.php" class="nav-link fw-bold btn btn-success">Data Foto</a>
         <a href="ardi_laporan.php" class="nav-link fw-bold btn btn-success">laporan</a>
+        <a href="ardi_notifikasi.php" class="nav-link fw-bold btn btn-success">Notifikasi</a>
+
       </ul>
             </div>
             <a href="ardi_prosses_logout.php" class="btn btn-danger ms-2">Logout</a>

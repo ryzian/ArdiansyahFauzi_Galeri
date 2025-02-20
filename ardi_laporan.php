@@ -96,7 +96,9 @@ $totalLike = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS tot
         </div>
     </div>
 </nav>
-
+<div class="chart-container">
+            <canvas id="laporanChart"></canvas>
+        </div>
 <div class="container mt-3">
     <h2 class="text-center fw-bold mb-4">Laporan Galeri Foto</h2>
     <div class="row mb-3">
@@ -173,8 +175,62 @@ $totalLike = mysqli_fetch_assoc(mysqli_query($ardi_conn, "SELECT COUNT(*) AS tot
                 </tfoot>
             </table>
         </div>
+    
     </div>
 </div>
+<script>
+     const chartLabels = <?php echo json_encode(array_column($reportData, 'namaalbum')); ?>;
+        const jumlahFoto = <?php echo json_encode(array_column($reportData, 'jumlahfoto')); ?>;
+        const jumlahLike = <?php echo json_encode(array_column($reportData, 'jumlahlike')); ?>;
+        const jumlahKomen = <?php echo json_encode(array_column($reportData, 'jumlahkomen')); ?>;
 
+        const ctx = document.getElementById('laporanChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartLabels,
+                datasets: [
+                    {
+                        label: 'Jumlah Foto',
+                        data: jumlahFoto,
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Jumlah Like',
+                        data: jumlahLike,
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Jumlah Komentar',
+                        data: jumlahKomen,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Statistik Album'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+</script>
 </body>
 </html>

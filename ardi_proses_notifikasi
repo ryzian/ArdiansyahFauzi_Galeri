@@ -8,14 +8,14 @@ $userid = $_SESSION['userid'];
 if (isset($_GET['like_fotoid'])) {
     $fotoid = $_GET['like_fotoid'];
 
-    $query = mysqli_query($koneksi, "SELECT f.userid AS foto_owner_id, f.judul_foto, f.lokasi_file, u.username 
+    $query = mysqli_query($koneksi, "SELECT f.userid AS foto_owner_id, f.judul_foto, f.tempatfile, u.username 
                                       FROM foto f 
                                       JOIN user u ON u.userid = f.userid 
                                       WHERE f.fotoid = '$fotoid'");
     $foto_data = mysqli_fetch_assoc($query);
     $foto_owner_id = $foto_data['foto_owner_id'];
     $judul_foto = $foto_data['judul_foto'];
-    $foto_path = "../assets/img/" . $foto_data['lokasi_file']; 
+    $foto_path = "../assets/img/" . $foto_data['tempatfile']; 
     $username = $foto_data['username'];
 
     if ($foto_owner_id != $userid) {
@@ -36,14 +36,14 @@ if (isset($_GET['komentar_fotoid']) && isset($_GET['isi_komentar'])) {
  die($isi_komentar);
  exit;
 
-    $query = mysqli_query($koneksi, "SELECT f.userid AS foto_owner_id, f.judul_foto, f.lokasi_file, u.username 
+    $query = mysqli_query($koneksi, "SELECT f.userid AS foto_owner_id, f.judul_foto, f.tempatfile, u.username 
                                       FROM foto f 
                                       JOIN user u ON u.userid = f.userid 
                                       WHERE f.fotoid = '$fotoid'");
     $foto_data = mysqli_fetch_assoc($query);
     $foto_owner_id = $foto_data['foto_owner_id'];
     $judul_foto = $foto_data['judul_foto'];
-    $foto_path = "../assets/img/" . $foto_data['lokasi_file']; 
+    $foto_path = "../assets/img/" . $foto_data['tempatfile']; 
     $username = $foto_data['username'];
 
     if ($foto_owner_id != $userid) {
