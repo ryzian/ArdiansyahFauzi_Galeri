@@ -5,12 +5,12 @@ session_start();
 session_unset(); 
 session_destroy(); 
 
-header("Location: ardi_publik.php"); 
+header("Location: index.php"); 
 exit();
 
 echo " <script >
 alert( 'logout Berhasil');
-location.href='ardi_publik.php';
+location.href='index.php';
 </script >";
 
 

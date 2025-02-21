@@ -4,11 +4,6 @@ include 'ardi_koneksi.php';
 
 $ardi_userid = isset($_SESSION['userid']) ? $_SESSION['userid'] : null;
 
-if ($ardi_userid) {
-    echo "Selamat datang, User ID: " . htmlspecialchars($ardi_userid);
-} else {
-    echo "";
-}
 
 $search = isset($_GET['search']) ? mysqli_real_escape_string($ardi_conn, $_GET['search']) : '';
 

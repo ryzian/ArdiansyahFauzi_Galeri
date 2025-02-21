@@ -30,5 +30,5 @@ if (mysqli_num_rows($ceksuka) == 1) {
     }
 }
 
-echo "<script>location.href='home.php';</script>";
+echo "<script>location.href='ardi_home.php';</script>";
 ?>
